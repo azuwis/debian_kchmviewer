@@ -3,7 +3,9 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-export DEB_LDFLAGS_MAINT_APPEND := -Wl,--as-needed
-
 %:
-	dh $@ --parallel --with kde
+	dh $@ --parallel --buildsystem=qmake
+
+override_dh_auto_install:
+	dh_auto_install
+	install -D bin/kchmviewer debian/kchmviewer/usr/bin/kchmviewer
