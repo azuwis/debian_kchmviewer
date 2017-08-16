@@ -1,0 +1,17 @@
+Author: Pino Toscano <pino@debian.org>
+Description: Link to X11 with cmake
+Last-Update: 2015-12-13
+Forwarded: no
+
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -47,7 +47,8 @@ QT4_ADD_RESOURCES( kchmviewerResources r
+ 
+ KDE4_ADD_EXECUTABLE( kchmviewer ${kchmviewerSources} ${kchmviewerResources} )
+ 
+-TARGET_LINK_LIBRARIES( kchmviewer 
++TARGET_LINK_LIBRARIES( kchmviewer
++	X11 
+ 	ebook
+ 	${LIBCHM_LIBRARY}
+ 	${LIBZIP_LIBRARY}
