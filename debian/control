@@ -3,7 +3,7 @@ Section: kde
 Priority: optional
 Maintainer: Debian KDE Extras Team <pkg-kde-extras@lists.alioth.debian.org>
 Uploaders: Fathi Boudra <fabo@debian.org>, Jose Luis Tallon <jltallon@adv-solutions.net>
-Build-Depends: debhelper (>= 9), libqtwebkit-dev, libchm-dev, libzip-dev, libx11-dev
+Build-Depends: debhelper (>= 9), libqt5webkit5-dev, libchm-dev, libzip-dev, libx11-dev, qt5-default
 Standards-Version: 3.9.6
 Homepage: http://www.kchmviewer.net/
 Vcs-Svn: svn://anonscm.debian.org/pkg-kde/kde-extras/kchmviewer/trunk/
