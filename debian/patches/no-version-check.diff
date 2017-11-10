@@ -1,0 +1,266 @@
+Description: Remove check for new versions.
+ The check for new versions is hopelessly broken.
+
+--- kchmviewer-7.7+20161005.2.orig/src/CMakeLists.txt
++++ kchmviewer-7.7+20161005.2/src/CMakeLists.txt
+@@ -18,7 +18,6 @@ SET( kchmviewerSources
+ 	viewwindow.cpp
+ 	viewwindowmgr.cpp
+ 	navigationpanel.cpp
+-	checknewversion.cpp
+ 	toolbarmanager.cpp
+ 	toolbareditor.cpp
+ 	qwebviewnetwork.cpp
+--- kchmviewer-7.7+20161005.2.orig/src/config.cpp
++++ kchmviewer-7.7+20161005.2/src/config.cpp
+@@ -51,7 +51,6 @@ Config::Config()
+ 	m_advLayoutDirectionRL = settings.value( "advanced/layoutltr", false ).toBool();
+ 	m_advAutodetectEncoding = settings.value( "advanced/autodetectenc", false ).toBool();
+ 	m_advExternalEditorPath = settings.value( "advanced/editorpath", "/usr/bin/kate" ).toString();
+-	m_advCheckNewVersion = settings.value( "advanced/checknewver", true ).toBool();
+ 	m_toolbarMode = (Config::ToolbarMode) settings.value( "advanced/toolbarmode", TOOLBAR_LARGEICONSTEXT ).toInt();
+ 	m_lastOpenedDir = settings.value( "advanced/lastopendir", "." ).toString();
+ 
+@@ -88,7 +87,6 @@ void Config::save( )
+ 	settings.setValue( "advanced/layoutltr", m_advLayoutDirectionRL );
+ 	settings.setValue( "advanced/autodetectenc", m_advAutodetectEncoding );
+ 	settings.setValue( "advanced/editorpath", m_advExternalEditorPath );
+-	settings.setValue( "advanced/checknewver", m_advCheckNewVersion );
+ 	settings.setValue( "advanced/toolbarmode", m_toolbarMode );
+ 	settings.setValue( "advanced/lastopendir", m_lastOpenedDir );
+ 
+--- kchmviewer-7.7+20161005.2.orig/src/config.h
++++ kchmviewer-7.7+20161005.2/src/config.h
+@@ -85,7 +85,6 @@ class Config
+ 		QString				m_advExternalEditorPath;
+ 		bool				m_advLayoutDirectionRL;
+ 		bool				m_advAutodetectEncoding;
+-		bool				m_advCheckNewVersion;
+ 
+ 	private:
+ 		QString				m_datapath;
+--- kchmviewer-7.7+20161005.2.orig/src/dialog_setup.cpp
++++ kchmviewer-7.7+20161005.2/src/dialog_setup.cpp
+@@ -95,8 +95,6 @@ DialogSetup::DialogSetup(QWidget *parent
+ 			rbToolbarText->setChecked( true );
+ 			break;
+ 	}
+-
+-	cbCheckForUpdates->setChecked( pConfig->m_advCheckNewVersion );
+ }
+ 
+ DialogSetup::~DialogSetup()
+@@ -178,7 +176,6 @@ void DialogSetup::accept()
+ 	
+ 	// Autodetect encoding
+ 	Check_Need_Restart( boxAutodetectEncoding, &pConfig->m_advAutodetectEncoding, &need_restart );
+-	pConfig->m_advCheckNewVersion = cbCheckForUpdates->isChecked();
+ 
+ 	// Layout direction management
+ 	bool layout_rl = boxLayoutDirectionRL->isChecked();
+--- kchmviewer-7.7+20161005.2.orig/src/dialog_setup.ui
++++ kchmviewer-7.7+20161005.2/src/dialog_setup.ui
+@@ -482,16 +482,6 @@
+             </property>
+            </widget>
+           </item>
+-          <item>
+-           <widget class="QCheckBox" name="cbCheckForUpdates">
+-            <property name="whatsThis">
+-             <string>If this option is enabled, the application will check for updates (when new version of application is released). If a new version is available, the program will show a messagebox dialog informing you about new version. This check will only performed once in 24 hours. No user information is requested or transmitted from your computer during this check.</string>
+-            </property>
+-            <property name="text">
+-             <string>Perform a check whether a new version is available (once a week)</string>
+-            </property>
+-           </widget>
+-          </item>
+          </layout>
+         </widget>
+        </item>
+--- kchmviewer-7.7+20161005.2.orig/src/mainwindow.cpp
++++ kchmviewer-7.7+20161005.2/src/mainwindow.cpp
+@@ -226,19 +226,6 @@ void MainWindow::checkForSharedMemoryMes
+         parseCmdLineArgs( args, true );
+ }
+ 
+-void MainWindow::checkNewVersionAvailable()
+-{
+-	// Create a New version available object if necessary. This object will auto-delete itself
+-	CheckNewVersion * pNewVer = new CheckNewVersion();
+-
+-	connect( pNewVer, SIGNAL(error(int)), this, SLOT(newVerAvailError(int)) );
+-	connect( pNewVer, SIGNAL(newVersionAvailable( NewVersionMetaMap )), this, SLOT(newVerAvailable(NewVersionMetaMap)) );
+-
+-	pNewVer->setUrl( "http://www.kchmviewer.net/latestversion.txt" );
+-	pNewVer->start();
+-}
+-
+-
+ bool MainWindow::loadFile ( const QString &loadFileName, bool call_open_page )
+ {
+ 	QString fileName = loadFileName;
+@@ -550,7 +537,6 @@ void MainWindow::printHelpAndExit()
+             "  -search <query>   searches for query in the Search tab, and activate the first entry if found\n"
+             "  -token <token>    specifies the application token; see the integration reference\n"
+             "  -background       start minimized\n"
+-            "  -novcheck         disable check for new version even if enabled in configuration\n"
+              , qPrintable( m_arguments[0] ) );
+ 
+     exit (1);
+@@ -559,7 +545,7 @@ void MainWindow::printHelpAndExit()
+ bool MainWindow::parseCmdLineArgs(const QStringList& args , bool from_another_app )
+ {
+     QString filename, search_query, search_index, open_url, search_toc;
+-    bool do_autotest = false, disable_vcheck = false, force_background = false;
++    bool do_autotest = false, force_background = false;
+ 
+ 	// argv[0] in Qt is still a program name
+     for ( int i = 1; i < args.size(); i++  )
+@@ -578,8 +564,6 @@ bool MainWindow::parseCmdLineArgs(const
+             i++; // ignore
+         else if ( args[i] == "-background" )
+             force_background = true;
+-        else if ( args[i] == "-novcheck" )
+-            disable_vcheck = true;
+         else if ( args[i] == "-v" || args[i] == "--version" )
+         {
+             printf("kchmviewer version %d.%d built at %s %s\n", APP_VERSION_MAJOR, APP_VERSION_MINOR, __DATE__, __TIME__ );
+@@ -605,20 +589,6 @@ bool MainWindow::parseCmdLineArgs(const
+         }
+ 	}
+ 
+-    // Check for a new version if needed
+-    if ( pConfig->m_advCheckNewVersion && !disable_vcheck )
+-    {
+-        QSettings settings;
+-
+-        if ( settings.contains( "advanced/lastupdate" ) )
+-        {
+-            QDateTime lastupdate = settings.value( "advanced/lastupdate" ).toDateTime();
+-
+-            if ( lastupdate.secsTo( QDateTime::currentDateTime() ) >= 86400 * 7 ) // seven days
+-                checkNewVersionAvailable();
+-        }
+-    }
+-
+     // Opening the file?
+ 	if ( !filename.isEmpty() )
+ 	{
+@@ -1167,7 +1137,6 @@ void MainWindow::setupActions()
+ 	// Settings
+ 	connect( settings_SettingsAction, SIGNAL( triggered() ), this, SLOT( actionChangeSettings() ) );
+ 	connect( actionEdit_toolbars, SIGNAL( triggered() ), this, SLOT( actionEditToolbars() ) );
+-	connect( actionCheck_for_updates, SIGNAL(triggered()), this, SLOT(checkNewVersionAvailable()) );
+ 
+ 	// Help menu
+ 	connect( actionAbout_kchmviewer, SIGNAL(triggered()), this, SLOT(actionAboutApp()) );
+@@ -1448,38 +1417,6 @@ void MainWindow::updateActions()
+ 	m_navPanel->setEnabled( enabled );
+ }
+ 
+-void MainWindow::newVerAvailError( int  )
+-{
+-	statusBar()->showMessage( tr("Unable to check whether a new version is available"), 2000 );
+-}
+-
+-void MainWindow::newVerAvailable( NewVersionMetaMap metadata )
+-{
+-	QSettings().setValue( "advanced/lastupdate", QDateTime::currentDateTime() );
+-
+-	// What is the latest version?
+-	QString current = QString("%1.%2") .arg(APP_VERSION_MAJOR) .arg(APP_VERSION_MINOR);
+-
+-    if ( metadata["Version"].toFloat() > current.toFloat() )
+-	{
+-		if ( QMessageBox::question( 0,
+-				tr("New version available"),
+-				tr("<html>A new version <b>%1</b> of Kchmviewer is available!<br><br>"
+-				   "You are currently using version %3.<br>"
+-				   "Do you want to visit the application web site %2?")
+-						.arg( metadata["Version"] )
+-						.arg( metadata["URL"] )
+-						.arg( current ),
+-					QMessageBox::Yes | QMessageBox::No,
+-					QMessageBox::Yes ) == QMessageBox::No )
+-				return;
+-
+-		QDesktopServices::openUrl ( QUrl(metadata["URL"]) );
+-	}
+-	else
+-		statusBar()->showMessage( tr("Checked for updates; you are using the latest version of kchmviewer"), 2000 );
+-}
+-
+ void MainWindow::actionEditToolbars()
+ {
+ 	m_toolbarMgr->editDialog();
+--- kchmviewer-7.7+20161005.2.orig/src/mainwindow.h
++++ kchmviewer-7.7+20161005.2/src/mainwindow.h
+@@ -24,7 +24,6 @@
+ #include "kde-qt.h"
+ #include "ebook.h"
+ #include "viewwindow.h"
+-#include "checknewversion.h"
+ 
+ #include "ui_mainwindow.h"
+ 
+@@ -143,15 +142,9 @@ class MainWindow : public QMainWindow, p
+ 		void		updateToolbars();
+ 		void		updateActions();
+ 
+-		void		checkNewVersionAvailable();
+-
+ 	protected slots:
+ 		// Called from the timer in main constructor
+ 		void 		firstShow();
+-
+-		// checknewversion
+-		void		newVerAvailError( int  );
+-		void		newVerAvailable( NewVersionMetaMap metadata );
+ 		
+         // single app mode
+         void        checkForSharedMemoryMessage();
+--- kchmviewer-7.7+20161005.2.orig/src/mainwindow.ui
++++ kchmviewer-7.7+20161005.2/src/mainwindow.ui
+@@ -29,8 +29,6 @@
+     </property>
+     <addaction name="settings_SettingsAction"/>
+     <addaction name="actionEdit_toolbars"/>
+-    <addaction name="separator"/>
+-    <addaction name="actionCheck_for_updates"/>
+    </widget>
+    <widget class="QMenu" name="menu_Bookmarks">
+     <property name="title">
+@@ -577,15 +575,6 @@
+     <string>About Qt</string>
+    </property>
+   </action>
+-  <action name="actionCheck_for_updates">
+-   <property name="icon">
+-    <iconset resource="resources/images.qrc">
+-     <normaloff>:/images/find_wrap.png</normaloff>:/images/find_wrap.png</iconset>
+-   </property>
+-   <property name="text">
+-    <string>Check for updates</string>
+-   </property>
+-  </action>
+   <action name="actionEdit_toolbars">
+    <property name="icon">
+     <iconset resource="resources/images.qrc">
+--- kchmviewer-7.7+20161005.2.orig/src/src.pro
++++ kchmviewer-7.7+20161005.2/src/src.pro
+@@ -14,7 +14,6 @@ HEADERS += config.h \
+     viewwindow.h \
+     viewwindowmgr.h \
+     navigationpanel.h \
+-    checknewversion.h \
+     toolbarmanager.h \
+     toolbareditor.h \
+     textencodings.h \
+@@ -34,7 +33,6 @@ SOURCES += config.cpp \
+     tab_search.cpp \
+     viewwindowmgr.cpp \
+     navigationpanel.cpp \
+-    checknewversion.cpp \
+     toolbarmanager.cpp \
+     toolbareditor.cpp \
+     textencodings.cpp \
