@@ -1,0 +1,37 @@
+Description: reorder LIBS so ld can link properly
+
+--- kchmviewer-7.7+20161005.2.orig/src/src.pro
++++ kchmviewer-7.7+20161005.2/src/src.pro
+@@ -40,7 +40,7 @@ SOURCES += config.cpp \
+     textencodings.cpp \
+     treeitem_toc.cpp \
+     treeitem_index.cpp
+-LIBS += -lchm -lzip
++
+ TARGET = ../bin/kchmviewer
+ CONFIG += threads \
+     warn_on \
+@@ -67,10 +67,6 @@ QT += webkit \
+     webkitwidgets \
+     printsupport
+ 
+-linux-g++*:{
+-    LIBS += -lX11
+-}
+-
+ # This is used by cross-build on 64-bit when building a 32-bit version
+ linux-g++-32: {
+        LIBS += -L.
+@@ -112,6 +108,12 @@ unix:!macx: {
+     POST_TARGETDEPS += ../lib/libebook/libebook.a
+ }
+ 
++LIBS += -lchm -lzip
++
++linux-g++*:{
++    LIBS += -lX11
++}
++
+ greaterThan(QT_MAJOR_VERSION, 4) {
+     # Qt 5
+     QT += webkit webkitwidgets
