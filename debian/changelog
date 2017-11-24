@@ -1,3 +1,9 @@
+kchmviewer (7.7-3) unstable; urgency=medium
+
+  * d/patches: Add fix_path_encoding.patch
+
+ -- Zhong Jianxin <azuwis@gmail.com>  Fri, 24 Nov 2017 15:54:46 +0800
+
 kchmviewer (7.7-2) unstable; urgency=medium
 
   [ xiota ]
