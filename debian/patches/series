@@ -2,3 +2,4 @@ disable_check_new_version.patch
 link-x11.diff
 force_webkit.diff
 reorder_libs.diff
+fix_path_encoding.patch
