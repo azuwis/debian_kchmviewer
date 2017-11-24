@@ -1,3 +1,12 @@
+kchmviewer (7.7-4) unstable; urgency=medium
+
+  * d/patches/: Add more encoding patches
+    - Update topics-url map when changing encoding
+    - Restore special files encoding hack
+    - Add special encodings for Chinese simplified
+
+ -- Zhong Jianxin <azuwis@gmail.com>  Fri, 24 Nov 2017 20:23:37 +0800
+
 kchmviewer (7.7-3) unstable; urgency=medium
 
   * d/patches: Add fix_path_encoding.patch
