@@ -1,0 +1,21 @@
+From: Zhong Jianxin <azuwis@gmail.com>
+Date: Fri, 24 Nov 2017 20:11:06 +0800
+Subject: Update topics-url map when changing encoding
+
+---
+ lib/libebook/ebook_chm.cpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/lib/libebook/ebook_chm.cpp b/lib/libebook/ebook_chm.cpp
+index a229ec8..67d51e9 100644
+--- a/lib/libebook/ebook_chm.cpp
++++ b/lib/libebook/ebook_chm.cpp
+@@ -879,6 +879,8 @@ bool EBook_CHM::changeFileEncoding( const QString& qtencoding  )
+ 		}
+ 	}
+ 
++	m_url2topics.clear();
++	fillTopicsUrlMap();
+ 	m_htmlEntityDecoder.changeEncoding( m_textCodec );
+ 	return true;
+ }

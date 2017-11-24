@@ -1,0 +1,29 @@
+From: Zhong Jianxin <azuwis@gmail.com>
+Date: Fri, 24 Nov 2017 10:35:47 +0800
+Subject: Add special encodings for Chinese simplified
+
+---
+ src/textencodings.cpp | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/src/textencodings.cpp b/src/textencodings.cpp
+index c01158e..0170127 100644
+--- a/src/textencodings.cpp
++++ b/src/textencodings.cpp
+@@ -56,6 +56,16 @@ static const TextEncodingEntry text_encoding_table [] =
+ 		"GB2313"
+ 	},
+ 
++	{
++		"Chinese Simplified",
++		"UTF-8/GBK"
++	},
++
++	{
++		"Chinese Simplified",
++		"GBK/UTF-8"
++	},
++
+ 	{
+ 		"Chinese Traditional",
+ 		"Big5"

@@ -3,3 +3,6 @@ link-x11.diff
 force_webkit.diff
 reorder_libs.diff
 fix_path_encoding.patch
+0006-Update-topics-url-map-when-changing-encoding.patch
+0007-Restore-special-files-encoding-hack.patch
+0008-Add-special-encodings-for-Chinese-simplified.patch
